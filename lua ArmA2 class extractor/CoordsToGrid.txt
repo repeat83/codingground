@@ -1,0 +1,40 @@
+153,60 - максимальный квадрат (правый) на Черноруси
+
+
+/ARMA_WORLDSPACE_OBJECT
+//An object that stores the parsed world space information as it is represented in arma
+//Arma worldspace is stored in a mysql column as a string like so: "[220,[8685.2,2490.78,0.339]]"
+//    The first number is orientation, but the others are x,y,z - we will store the z value, but there is
+//    no need for it right now anyways
+//Construct with a raw worldpsace string stored in the db, and this will do the work to get back an object
+    function worldspaceDescribe(pString) {
+        //we must offset the y amount according to a seemingly random number that took me ages to figure out.
+        //    If this is determined to be off, you can edit it here
+        this.chernarusYoffset = 153.60;
+       
+        //The arma map grid: eg: 152, 113. It also gets 2 decimal points so the ppoint is down to teh square meter
+        this.armagrid = {x : null,y : null,z : null};
+        this.worldspace = {x : null,y : null,z : null};
+       
+        //CONSTRUCTOR
+        if(pString != null && pString != '') {
+            try {
+                var str = pString.replace(/\[/g,'').replace(/\]/g,''); //Remove the brackets
+                var arr = str.split(','); //convert to an array and parse
+               
+                this.worldspace.x = parseFloat(arr[1]);
+                this.worldspace.y = parseFloat(arr[2]);
+                this.worldspace.z = parseFloat(arr[3]);
+               
+                //we must offset the y amount according to a seemingly random number that took me ages to figure out....
+                var offset = this.chernarusYoffset - (Math.round((this.worldspace.y*100)/100)/100);
+                this.armagrid.x = Math.round((this.worldspace.x*100)/100)/100;
+                this.armagrid.y = Math.round(offset*100)/100;
+                this.armagrid.z = Math.round(this.worldspace.z*100)/100;
+            } catch(e){
+                alert(e);
+            }
+        } else {
+            alert('You need to construct me with a string');   
+        }   
+    }
